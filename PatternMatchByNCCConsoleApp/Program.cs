@@ -15,9 +15,9 @@ namespace PatternMatchByNCC
             bool debug = false; // 是否开启调试模式
 
             // 加载源图像和目标图像
-            Mat src = Cv2.ImRead("F:\\02-Code\\Fastest_Image_Pattern_Matching\\Test Images\\Src4.bmp",
+            Mat src = Cv2.ImRead("F:\\02-Code\\Fastest_Image_Pattern_Matching\\Test Images\\Src7.bmp",
                 ImreadModes.Grayscale);
-            Mat dst = Cv2.ImRead("F:\\02-Code\\Fastest_Image_Pattern_Matching\\Test Images\\Dst4.bmp",
+            Mat dst = Cv2.ImRead("F:\\02-Code\\Fastest_Image_Pattern_Matching\\Test Images\\Dst7.bmp",
                 ImreadModes.Grayscale);
             Cv2.ImShow("src", src);
             Cv2.ImShow("dst", dst);
@@ -49,7 +49,7 @@ namespace PatternMatchByNCC
             // 匹配
             bool srcReverse = false; // 是否反转源图像
             double angleStep = 10; // 旋转角度步长
-            bool autoAngleStep = false; // 是否自动计算角度步长
+            bool autoAngleStep = true; // 是否自动计算角度步长
             double startAngle = 0;
             double angleRange = 360;
             double matchThreshold = 0.9; // 匹配阈值
