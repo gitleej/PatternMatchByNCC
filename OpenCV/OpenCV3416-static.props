@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <IncludePath>E:\Software\OpenCV3416\include\opencv2;E:\Software\OpenCV3416\include\opencv;E:\Software\OpenCV3416\include;$(IncludePath)</IncludePath>
+    <LibraryPath>E:\Software\OpenCV3416\x64\vc16\staticlib;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <Link>
+      <AdditionalDependencies>IlmImf.lib;ittnotify.lib;libjasper.lib;libjpeg-turbo.lib;libpng.lib;libprotobuf.lib;libtiff.lib;libwebp.lib;quirc.lib;zlib.lib;opencv_core3416.lib;opencv_highgui3416.lib;opencv_imgcodecs3416.lib;opencv_imgproc3416.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup />
+</Project>

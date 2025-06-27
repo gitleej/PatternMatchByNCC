@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using OpenCvSharp;
+using PatternMatch;
 
 namespace PatternMatchByNCC
 {
@@ -15,13 +16,23 @@ namespace PatternMatchByNCC
             bool debug = false; // 是否开启调试模式
 
             // 加载源图像和目标图像
-            Mat src = Cv2.ImRead("F:\\02-Code\\Fastest_Image_Pattern_Matching\\Test Images\\Src7.bmp",
+            Mat src = Cv2.ImRead("F:\\02-Code\\Fastest_Image_Pattern_Matching\\Test Images\\Src4.bmp",
                 ImreadModes.Grayscale);
-            Mat dst = Cv2.ImRead("F:\\02-Code\\Fastest_Image_Pattern_Matching\\Test Images\\Dst7.bmp",
+            Mat dst = Cv2.ImRead("F:\\02-Code\\Fastest_Image_Pattern_Matching\\Test Images\\Dst4.bmp",
                 ImreadModes.Grayscale);
             Cv2.ImShow("src", src);
             Cv2.ImShow("dst", dst);
             Cv2.WaitKey(0);
+
+            // 测试CMatchPatternByNCC类
+            CMatchPatternByNCC matchPatternByNCC = new CMatchPatternByNCC();
+            // 学习模板图像金字塔
+            int pyramidLayers = 3; // 图像金字塔层数
+            int minReduceSize = 256; // 最小图像缩放尺寸
+            bool autoPyramidLayers = true; // 是否自动计算图像金字塔层数
+            matchPatternByNCC.LearnPattern(dst, pyramidLayers, minReduceSize, autoPyramidLayers);
+            // 显示模板图像金字塔
+            matchPatternByNCC.ShowTemplatePyramid();
 
             PatternMatchByNCC patternMatch = new PatternMatchByNCC();
             int pyramidMaxLayers = 3;
