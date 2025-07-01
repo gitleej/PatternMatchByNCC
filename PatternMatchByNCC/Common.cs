@@ -341,7 +341,7 @@ namespace PatternMatchByNCC
 
             //VecBlock = new List<Block>(iCol * iRow);
             // 遍历完整块
-            int iCount = 0;
+            //int iCount = 0;
             for (int y = 0; y < iRow; y++)
             {
                 for (int x = 0; x < iCol; x++)

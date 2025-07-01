@@ -4,6 +4,11 @@
 			opencv_videoio_ffmpeg4110_64
 			OpenCvSharpExtern
 			SIMDConv
+			PatternMatchNative
+			opencv_core4100
+			opencv_highgui4100
+			opencv_imgcodecs4100
+			opencv_imgproc4100
 		</Unmanaged64Assemblies>
 	</Costura>
 </Weavers>

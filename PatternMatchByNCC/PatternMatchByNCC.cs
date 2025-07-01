@@ -283,17 +283,18 @@ namespace PatternMatchByNCC
             else
             {
                 // 如果角度范围为0，则只使用起始角度
-                if (startAngle == 0)
-                {
-                    angles.Add(startAngle);
-                }
-                else
-                {
-                    for (int i = -1; i <= 1; i++)
-                    {
-                        angles.Add(startAngle + angleStep * i);
-                    }
-                }
+                // if (startAngle == 0)
+                // {
+                //     angles.Add(startAngle);
+                // }
+                // else
+                // {
+                //     for (int i = -1; i <= 1; i++)
+                //     {
+                //         angles.Add(startAngle + angleStep * i);
+                //     }
+                // }
+                angles.Add(startAngle);
             }
 
             if (debug)
@@ -432,8 +433,11 @@ namespace PatternMatchByNCC
 
             // 匹配结束计时
             stopwatch.Stop();
-            // 匹配时间消耗
-            Console.WriteLine($"第一阶段匹配耗时: {stopwatch.Elapsed.TotalMilliseconds:F2} ms");
+            if (debug)
+            {
+                // 匹配时间消耗
+                Console.WriteLine($"第一阶段匹配耗时: {stopwatch.Elapsed.TotalMilliseconds:F2} ms");
+            }
             // 对vecMatchParameters排序
             vecMatchParameters.Sort(CompareScoreBig2Small);
 
@@ -566,17 +570,18 @@ namespace PatternMatchByNCC
                         }
                         else
                         {
-                            if (startAngle == 0)
-                            {
-                                vecAngles.Add(startAngle);
-                            }
-                            else
-                            {
-                                for (int j = -1; j <= 1; j++)
-                                {
-                                    vecAngles.Add(dMatchedAngle + angleStep * j);
-                                }
-                            }
+                            // if (startAngle == 0)
+                            // {
+                            //     vecAngles.Add(startAngle);
+                            // }
+                            // else
+                            // {
+                            //     for (int j = -1; j <= 1; j++)
+                            //     {
+                            //         vecAngles.Add(dMatchedAngle + angleStep * j);
+                            //     }
+                            // }
+                            vecAngles.Add(dMatchedAngle);
                         }
 
                         if (debug)

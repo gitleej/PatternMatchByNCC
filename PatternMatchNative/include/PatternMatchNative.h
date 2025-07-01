@@ -13,6 +13,7 @@
     #else
         #define PM_API
     #endif
+#include "Common.h"
 
 extern "C" {
 /**
@@ -66,6 +67,47 @@ PM_API int  NV_Get_Template_Pyramid_Layers(void* instance);
 PM_API unsigned char* NV_Get_Template_Pyramid(
     void* instance, int index, int* outRows, int* outCols, int* outType, int* outStep);
 
+/**
+ * @brief 模板匹配导出函数
+ * @param instance 实例指针
+ * @param srcImageData 源图像数据指针
+ * @param srcImageWidth 源图像宽度
+ * @param srcImageHeight 源图像高度
+ * @param srcImageStride 源图像步长
+ * @param outArray 输出匹配结果
+ * @param srcReverse 是否反转源图像
+ * @param angleStep 旋转角度步长
+ * @param autoAngleStep 是否启用自动计算旋转角度步长
+ * @param startAngle 匹配起始角度
+ * @param angleRange 匹配角度范围
+ * @param matchThreshold 匹配阈值
+ * @param maxMatchCount 最大匹配目标数量
+ * @param useSIMD 是否使用SIMD加速
+ * @param maxOverlap 匹配目标最大重叠率
+ * @param subPixelEstimation 是否启用亚像素估计
+ * @param fastMode 是否启用快速匹配模式
+ * @param debug 是否启用调试模式
+ * @return 实际匹配目标数量
+ */
+PM_API int NV_Match(void* instance,                     // 实例指针
+                    const unsigned char* srcImageData,  // 源图像数据指针
+                    int srcImageWidth,                  // 源图像宽度
+                    int srcImageHeight,                 // 源图像高度
+                    int srcImageStride,                 // 源图像步长
+                    PatternMatch::SingleTargetMatch* outArray,
+                    bool srcReverse = false,         // 是否反转源图像
+                    double angleStep = 10,           // 旋转角度步长
+                    bool autoAngleStep = true,       // 是否自动计算角度步长
+                    double startAngle = 0,           // 起始匹配角度
+                    double angleRange = 360,         // 匹配角度范围
+                    double matchThreshold = 0.9,     // 匹配阈值
+                    int maxMatchCount = 70,          // 最大匹配数量
+                    bool useSIMD = true,             // 是否使用SIMD优化
+                    double maxOverlap = 0,           // 最大重叠比例
+                    bool subPixelEstimation = true,  // 是否进行亚像素估计
+                    bool fastMode = false,           // 是否使用快速模式
+                    bool debug = false               // 是否启用调试模式
+);
 }
 
 #endif  // _PATTERN_MATCH_NATIVE_H_

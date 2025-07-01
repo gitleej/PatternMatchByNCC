@@ -14,6 +14,7 @@ namespace PatternMatchByNCC
         static void Main(string[] args)
         {
             bool debug = false; // 是否开启调试模式
+            int repeatTimes = 100; // 重复匹配次数
 
             // 加载源图像和目标图像
             Mat src = Cv2.ImRead("F:\\02-Code\\Fastest_Image_Pattern_Matching\\Test Images\\Src4.bmp",
@@ -33,6 +34,40 @@ namespace PatternMatchByNCC
             matchPatternByNCC.LearnPattern(dst, pyramidLayers, minReduceSize, autoPyramidLayers);
             // 显示模板图像金字塔
             matchPatternByNCC.ShowTemplatePyramid();
+
+            // 匹配
+            // 匹配开始计时
+            var stopwatch = Stopwatch.StartNew();
+            int matchedTargetNum = 0;
+            for (int i = 0; i < repeatTimes; i++)
+            {
+                var repeatStopWatch = Stopwatch.StartNew();
+                matchedTargetNum = matchPatternByNCC.Match(src,
+                    srcReverse: false, angleStep: 10, autoAngleStep: true, startAngle: 0, angleRange: 180,
+                    matchThreshold: 0.9, maxMatchCount: 70, useSIMD: true, maxOverlap: 0,
+                    subPixelEstimation: true, fastMode: false, debug:false);
+                repeatStopWatch.Stop();
+                Console.WriteLine($"第 {i + 1} 次匹配耗时: {repeatStopWatch.Elapsed.TotalMilliseconds:F2} ms");
+            }
+            // 匹配结束计时
+            stopwatch.Stop();
+            // 匹配时间消耗
+            Console.WriteLine($"匹配耗时: {stopwatch.Elapsed.TotalMilliseconds / repeatTimes:F2} ms");
+            Mat showMat = new Mat();
+            // 可视化匹配结果
+            // 输出匹配结果
+            for (int i = 0; i < matchPatternByNCC.MatchedTargetNum; i++)
+            {
+                Console.WriteLine($"匹配结果 {i + 1}:");
+                //Console.WriteLine($"位置: {ptLT}, {ptRB}, {ptLB}, {ptRT}");
+                Console.WriteLine($"角度: {matchPatternByNCC.Matches[i].Angle}");
+                Console.WriteLine($"匹配分数: {matchPatternByNCC.Matches[i].Score}");
+            }
+            Cv2.CvtColor(src, showMat, ColorConversionCodes.GRAY2BGR);
+            matchPatternByNCC.Visualization(showMat, new Scalar(0, 255, 0), new Scalar(255, 0, 255),
+                new Scalar(255, 0, 255), frontScale: 0.5, thickness: 1, showScore:false);
+            Cv2.ImShow($"{matchedTargetNum}", showMat);
+            Cv2.WaitKey(0);
 
             PatternMatchByNCC patternMatch = new PatternMatchByNCC();
             int pyramidMaxLayers = 3;
@@ -62,7 +97,7 @@ namespace PatternMatchByNCC
             double angleStep = 10; // 旋转角度步长
             bool autoAngleStep = true; // 是否自动计算角度步长
             double startAngle = 0;
-            double angleRange = 360;
+            double angleRange = 180;
             double matchThreshold = 0.9; // 匹配阈值
             int maxMatchCount = 70; // 最大匹配数量
             bool useSIMD = true; // 是否使用SIMD优化
@@ -70,13 +105,20 @@ namespace PatternMatchByNCC
             bool subPixelEstimation = true; // 是否进行亚像素估计
             bool fastMode = false; // 是否使用快速模式
             // 匹配开始计时
-            var stopwatch = Stopwatch.StartNew();
-            var result = patternMatch.Match(src, templData, srcReverse, angleStep, autoAngleStep, startAngle, angleRange,
-                matchThreshold, maxMatchCount, useSIMD, maxOverlap, subPixelEstimation, fastMode, debug);
+            List<SingleMatchedTarget> result = new List<SingleMatchedTarget>();
+            stopwatch = Stopwatch.StartNew();
+            for (int i = 0; i < repeatTimes; i++)
+            {
+                var repeatStopWatch = Stopwatch.StartNew();
+                result = patternMatch.Match(src, templData, srcReverse, angleStep, autoAngleStep, startAngle, angleRange,
+                    matchThreshold, maxMatchCount, useSIMD, maxOverlap, subPixelEstimation, fastMode, debug);
+                repeatStopWatch.Stop();
+                Console.WriteLine($"第 {i + 1} 次匹配耗时: {repeatStopWatch.Elapsed.TotalMilliseconds:F2} ms");
+            }
             // 匹配结束计时
             stopwatch.Stop();
             // 匹配时间消耗
-            Console.WriteLine($"匹配耗时: {stopwatch.Elapsed.TotalMilliseconds:F2} ms");
+            Console.WriteLine($"匹配耗时: {stopwatch.Elapsed.TotalMilliseconds / repeatTimes:F2} ms");
             // 可视化结果
             Mat colorSrc = new Mat();
             Cv2.CvtColor(src, colorSrc, ColorConversionCodes.GRAY2BGR);

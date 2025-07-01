@@ -118,9 +118,14 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Costura64\OpenCvSharpExtern.dll" />
-    <Content Include="Costura64\opencv_videoio_ffmpeg4110_64.dll" />
-    <Content Include="Costura64\SIMDConv.dll" />
+    <EmbeddedResource Include="costura-win-x64\OpenCvSharpExtern.dll" />
+    <EmbeddedResource Include="costura-win-x64\opencv_core4100.dll" />
+    <EmbeddedResource Include="costura-win-x64\opencv_highgui4100.dll" />
+    <EmbeddedResource Include="costura-win-x64\opencv_imgcodecs4100.dll" />
+    <EmbeddedResource Include="costura-win-x64\opencv_imgproc4100.dll" />
+    <EmbeddedResource Include="costura-win-x64\opencv_videoio_ffmpeg4110_64.dll" />
+    <EmbeddedResource Include="costura-win-x64\PatternMatchNative.dll" />
+    <EmbeddedResource Include="costura-win-x64\SIMDConv.dll" />
     <Content Include="FodyWeavers.xml" />
   </ItemGroup>
   <ItemGroup />
