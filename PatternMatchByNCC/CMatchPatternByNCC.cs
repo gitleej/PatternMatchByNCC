@@ -8,6 +8,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using PatternMatchByNCC;
 using Point = OpenCvSharp.Point;
 
 namespace PatternMatch
@@ -45,38 +46,35 @@ namespace PatternMatch
         public int Index { get; set; }
     }
 
-    /// <summary>
-    /// 非托管类，用于模式匹配的归一化互相关（NCC）算法。
-    /// </summary>
-    public class CMatchPatternByNCC : IDisposable
+    internal static class NativeMethods
     {
-        private IntPtr _native;
-
         [DllImport("PatternMatchNative.dll", EntryPoint = "PM_Create", CallingConvention = CallingConvention.Cdecl)]
-        static extern IntPtr CPMCreate();
+        public static extern IntPtr CPMCreate();
 
         [DllImport("PatternMatchNative.dll", EntryPoint = "PM_Destroy", CallingConvention = CallingConvention.Cdecl)]
-        static extern void CPMDestroy(IntPtr native);
+        public static extern void CPMDestroy(IntPtr native);
 
         [DllImport("PatternMatchNative.dll", EntryPoint = "Learn_Pattern", CallingConvention = CallingConvention.Cdecl)]
-        static extern void CLearnPattern(IntPtr native,
+        public static extern void CLearnPattern(IntPtr native,
             IntPtr pTemplImageData,
             int iTemplWidth,
             int iTemplHeight,
             int iTemplStride,
             int iPyramidLayers,
             int iMinReduceSize,
-            [MarshalAs(UnmanagedType.I1)] 
-            bool bAutoPyramidLayers);
+            [MarshalAs(UnmanagedType.I1)]
+            bool bAutoPyramidLayers,
+            [MarshalAs(UnmanagedType.I1)]
+            bool bDebug);
 
         [DllImport("PatternMatchNative.dll", EntryPoint = "NV_Get_Template_Pyramid_Layers", CallingConvention = CallingConvention.Cdecl)]
-        static extern int CGetTemplatePyramidLayers(IntPtr native);
+        public static extern int CGetTemplatePyramidLayers(IntPtr native);
 
         [DllImport("PatternMatchNative.dll", EntryPoint = "NV_Get_Template_Pyramid", CallingConvention = CallingConvention.Cdecl)]
-        static extern IntPtr CGetTemplatePyramid(IntPtr native, int index, out int rows, out int cols, out int type, out int step);
+        public static extern IntPtr CGetTemplatePyramid(IntPtr native, int index, out int rows, out int cols, out int type, out int step);
 
         [DllImport("PatternMatchNative.dll", EntryPoint = "NV_Match", CallingConvention = CallingConvention.Cdecl)]
-        static extern int CMatch(
+        public static extern int CMatch(
             IntPtr instance,
             IntPtr srcImageData,
             int srcImageWidth,
@@ -95,7 +93,15 @@ namespace PatternMatch
             [MarshalAs(UnmanagedType.I1)] bool subPixelEstimation,
             [MarshalAs(UnmanagedType.I1)] bool fastMode,
             [MarshalAs(UnmanagedType.I1)] bool debug);
+    }
 
+    /// <summary>
+    /// 非托管类，用于模式匹配的归一化互相关（NCC）算法。
+    /// </summary>
+    public class CMatchPatternByNCC : IDisposable, IPatternMatchByNCC
+    {
+        private IntPtr _native;
+        
         /// <summary>
         /// 匹配目标数量
         /// </summary>
@@ -108,7 +114,7 @@ namespace PatternMatch
 
         public CMatchPatternByNCC()
         {
-            _native = CPMCreate();
+            _native = NativeMethods.CPMCreate();
             if (_native == IntPtr.Zero)
             {
                 throw new Exception("Failed to create native CMatchPatternByNCC instance.");
@@ -119,7 +125,7 @@ namespace PatternMatch
         {
             if (_native != IntPtr.Zero)
             {
-                CPMDestroy(_native);
+                NativeMethods.CPMDestroy(_native);
                 _native = IntPtr.Zero;
             }
         }
@@ -131,7 +137,8 @@ namespace PatternMatch
         /// <param name="pyramidLayers">图像金字塔层数</param>
         /// <param name="minReduceSize">最小图像缩放尺寸</param>
         /// <param name="autoPyramidLayers">是否自动计算图像金字塔层数</param>
-        public void LearnPattern(Mat templateImage, int pyramidLayers, int minReduceSize, bool autoPyramidLayers)
+        /// <param name="debug">是否启用Debug模式</param>
+        public void LearnPattern(Mat templateImage, int pyramidLayers, int minReduceSize, bool autoPyramidLayers, bool debug = false)
         {
             unsafe
             {
@@ -144,8 +151,8 @@ namespace PatternMatch
                     throw new ObjectDisposedException("CMatchPatternByNCC");
                 }
 
-                CLearnPattern(_native, pTemplateImageData, templateWidth, templateHeight, templateStride,
-                    pyramidLayers, minReduceSize, autoPyramidLayers);
+                NativeMethods.CLearnPattern(_native, pTemplateImageData, templateWidth, templateHeight, templateStride,
+                    pyramidLayers, minReduceSize, autoPyramidLayers, debug);
             }
         }
 
@@ -154,10 +161,11 @@ namespace PatternMatch
         /// </summary>
         public void ShowTemplatePyramid()
         {
-            int templatePyramidLayers = CGetTemplatePyramidLayers(_native);
+            int templatePyramidLayers = NativeMethods.CGetTemplatePyramidLayers(_native);
+            Console.WriteLine($"金字塔层数: {templatePyramidLayers}");
             for (int i = 0; i < templatePyramidLayers; i++)
             {
-                IntPtr ptr = CGetTemplatePyramid(_native, i, out int rows, out int cols, out int type, out int step);
+                IntPtr ptr = NativeMethods.CGetTemplatePyramid(_native, i, out int rows, out int cols, out int type, out int step);
                 if (ptr == IntPtr.Zero)
                 {
                     continue;
@@ -189,7 +197,7 @@ namespace PatternMatch
                 int srcHeight = src.Height;
                 int srcStride = (int)src.Step();
                 CSingleTargetMatch[] outArray = new CSingleTargetMatch[maxMatchCount];
-                int matchCount = CMatch(_native, pSrcImageData, srcWidth, srcHeight, srcStride,
+                int matchCount = NativeMethods.CMatch(_native, pSrcImageData, srcWidth, srcHeight, srcStride,
                     outArray, srcReverse, angleStep, autoAngleStep, startAngle, angleRange,
                     matchThreshold, maxMatchCount, useSIMD, maxOverlap, subPixelEstimation, fastMode, debug);
                 Matches = new List<SingleTargetMatch>();

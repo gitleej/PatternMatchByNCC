@@ -13,12 +13,12 @@ namespace PatternMatchByNCC.Tests
     [TestClass()]
     public class PatternMatchByNCCTests
     {
-        private PatternMatchByNCC _matcher;
+        private PatternMatch.PatternMatchByNCC _matcher;
 
         [TestInitialize]
         public void Setup()
         {
-            _matcher = new PatternMatchByNCC();
+            _matcher = new PatternMatch.PatternMatchByNCC();
         }
 
         [TestMethod]
@@ -29,13 +29,13 @@ namespace PatternMatchByNCC.Tests
             using (var matTemp = Mat.Ones(64, 64, MatType.CV_8UC1) * 255)  // 纯白图像
             {
                 // Act
-                var result = _matcher.LearnPattern(matTemp, 3, 16, true);
+                _matcher.LearnPattern(matTemp, 3, 16, true);
 
                 // Assert
-                Assert.IsTrue(result.IsPatternLearned);
-                Assert.AreEqual(3, result.VecPyramid.Count);
-                Assert.AreEqual(255, result.BorderColor);
-                Assert.IsTrue(result.VecResultEqual1[0]); // 应该检测为纯色图像
+                Assert.IsTrue(_matcher.TemplateData.IsPatternLearned);
+                Assert.AreEqual(3, _matcher.TemplateData.VecPyramid.Count);
+                Assert.AreEqual(255, _matcher.TemplateData.BorderColor);
+                Assert.IsTrue(_matcher.TemplateData.VecResultEqual1[0]); // 应该检测为纯色图像
             }
         }
 
@@ -56,12 +56,12 @@ namespace PatternMatchByNCC.Tests
                 }
 
                 // Act
-                var result = _matcher.LearnPattern(matTemp, 3, 16, true);
+                _matcher.LearnPattern(matTemp, 3, 16, true);
 
                 // Assert
-                Assert.IsTrue(result.IsPatternLearned);
-                Assert.AreEqual(3, result.VecPyramid.Count);
-                Assert.IsFalse(result.VecResultEqual1[0]); // 不应该检测为纯色图像
+                Assert.IsTrue(_matcher.TemplateData.IsPatternLearned);
+                Assert.AreEqual(3, _matcher.TemplateData.VecPyramid.Count);
+                Assert.IsFalse(_matcher.TemplateData.VecResultEqual1[0]); // 不应该检测为纯色图像
             }
         }
 
@@ -75,12 +75,12 @@ namespace PatternMatchByNCC.Tests
                 matTemp.SetTo(128);
 
                 // Act
-                var result = _matcher.LearnPattern(matTemp, 5, 16, true);
+                _matcher.LearnPattern(matTemp, 5, 16, true);
 
                 // Assert
-                Assert.IsTrue(result.IsPatternLearned);
+                Assert.IsTrue(_matcher.TemplateData.IsPatternLearned);
                 // 256x256 -> 128x128 -> 64x64 -> 32x32 -> 16x16 -> 8x8 (5层)
-                Assert.AreEqual(5, result.VecPyramid.Count);
+                Assert.AreEqual(5, _matcher.TemplateData.VecPyramid.Count);
             }
         }
 
@@ -110,18 +110,18 @@ namespace PatternMatchByNCC.Tests
             using (var matTemp = Mat.Ones(64, 64, MatType.CV_8UC1) * 128)  // 灰度值128的图像
             {
                 // Act
-                var result = _matcher.LearnPattern(matTemp, 2, 16, true);
+                _matcher.LearnPattern(matTemp, 2, 16, true);
 
                 // Assert
-                Assert.IsTrue(result.IsPatternLearned);
-                Assert.AreEqual(2, result.VecPyramid.Count);
+                Assert.IsTrue(_matcher.TemplateData.IsPatternLearned);
+                Assert.AreEqual(2, _matcher.TemplateData.VecPyramid.Count);
 
                 // 验证逆面积计算
                 double expectedInvArea = 1.0 / (64 * 64);
-                Assert.AreEqual(expectedInvArea, result.VecInvArea[0], 1e-10);
+                Assert.AreEqual(expectedInvArea, _matcher.TemplateData.VecInvArea[0], 1e-10);
 
                 // 验证均值
-                Assert.AreEqual(128, result.VecTemplMean[0].Val0, 1);
+                Assert.AreEqual(128, _matcher.TemplateData.VecTemplMean[0].Val0, 1);
             }
         }
 

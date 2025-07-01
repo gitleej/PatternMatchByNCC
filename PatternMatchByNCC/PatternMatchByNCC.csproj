@@ -103,6 +103,7 @@
   <ItemGroup>
     <Compile Include="CMatchPatternByNCC.cs" />
     <Compile Include="Common.cs" />
+    <Compile Include="IPatternMatchByNCC.cs" />
     <Compile Include="PatternMatchByNCC.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -9,12 +9,16 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using PatternMatchByNCC;
 
-namespace PatternMatchByNCC
+namespace PatternMatch
 {
-    public class PatternMatchByNCC
+    public class PatternMatchByNCC : IPatternMatchByNCC
     {
         private const int MatchCandidateNum = 5;
+        public TemplData TemplateData;
+        public int MatchedTargetNum { get; set; } = 0;
+        public List<SingleMatchedTarget> Matches { get; set; }
 
         /// <summary>
         /// 学习模板图像并构建金字塔
@@ -27,11 +31,108 @@ namespace PatternMatchByNCC
         /// false使用最小缩放尺寸自动计算图像金字塔层数</param>
         /// <param name="debug">是否启动debug。</param>
         /// <returns>模板图像金字塔及其统计参数</returns>
-        public TemplData LearnPattern(
-            Mat matTemp, 
-            int pyramidMaxLayers, 
-            int minReudceArea, 
-            bool maxLevelFirst, 
+        // public TemplData LearnPattern(
+        //     Mat matTemp, 
+        //     int pyramidMaxLayers, 
+        //     int minReudceArea, 
+        //     bool maxLevelFirst, 
+        //     bool debug = false)
+        // {
+        //     // 输入验证
+        //     if (matTemp == null)
+        //     {
+        //         throw new ArgumentNullException(nameof(matTemp), "输入图像不能为空");
+        //     }
+        //     if (pyramidMaxLayers < 1 && maxLevelFirst)
+        //     {
+        //         throw new ArgumentException("金字塔层数必须大于0", nameof(pyramidMaxLayers));
+        //     }
+        //     if (minReudceArea < 1 && !maxLevelFirst)
+        //     {
+        //         throw new ArgumentException("最小缩放尺寸必须大于0", nameof(minReudceArea));
+        //     }
+        //
+        //     TemplData templData = new TemplData();
+        //     if (!maxLevelFirst)
+        //     {
+        //         pyramidMaxLayers = GetTopLayer(matTemp, minReudceArea);
+        //     }
+        //     else
+        //     {
+        //         pyramidMaxLayers -= 1;
+        //     }
+        //
+        //     // 构建模板图像金字塔
+        //     VectorOfMat pyramidArray = new VectorOfMat();
+        //     Cv2.BuildPyramid(matTemp, pyramidArray, pyramidMaxLayers);
+        //     templData.VecPyramid = pyramidArray.ToArray().ToList();
+        //
+        //     if (debug)
+        //     {
+        //         foreach (var mat in templData.VecPyramid)
+        //         {
+        //             Cv2.ImShow("pyramid", mat);
+        //             Cv2.WaitKey(0);
+        //         }
+        //         Cv2.DestroyAllWindows();
+        //     }
+        //
+        //     // 计算模板边界颜色(用于仿射变换填充)
+        //     templData.BorderColor = Cv2.Mean(matTemp).Val0 < 128 ? 0 : 255; // 假设边界颜色为黑色或白色
+        //     templData.Resize(templData.VecPyramid.Count); // 确保所有列表大小一致
+        //
+        //     // 计算每层金字塔图像的统计参数
+        //     for (int i = 0; i < templData.VecPyramid.Count; i++)
+        //     {
+        //         Mat matPyramid = templData.VecPyramid[i];
+        //         
+        //         // 计算每层图像的逆面积
+        //         double invArea = 1.0 / (matPyramid.Width * matPyramid.Height);
+        //
+        //         // 计算每层图像的均值和标准差
+        //         Scalar templMean, templSdv;
+        //         Cv2.MeanStdDev(matPyramid, out templMean, out templSdv);
+        //         double templNorm = templSdv[0] * templSdv[0] + templSdv[1] * templSdv[1] + templSdv[2] * templSdv[2];
+        //
+        //         // 检查是否为纯色图像
+        //         if (templNorm < double.Epsilon) // 如果标准差接近0，认为是纯色图像
+        //         {
+        //             templData.VecResultEqual1[i] = true; // 标记为纯色图像
+        //         }
+        //
+        //         // 计算总平方和
+        //         double templSum = templNorm + templMean[0] * templMean[0] + templMean[1] * templMean[1] +
+        //                           templMean[2] * templMean[2];
+        //         templSum /= invArea;
+        //         templNorm = Math.Sqrt(templNorm);
+        //         templNorm /= Math.Sqrt(invArea);
+        //
+        //         // 保存计算结果
+        //         templData.VecTemplMean[i] = templMean;
+        //         templData.VecTemplNorm[i] = templNorm;
+        //         templData.VecInvArea[i] = invArea;
+        //     }
+        //
+        //     templData.IsPatternLearned = true;
+        //
+        //     return templData;
+        // }
+
+        /// <summary>
+        /// 学习模板图像并构建金字塔
+        /// </summary>
+        /// <param name="matTemp">输入模板图像</param>
+        /// <param name="pyramidMaxLayers">图像金字塔层数</param>
+        /// <param name="minReudceArea">最小缩放尺寸</param>
+        /// <param name="maxLevelFirst">是否优先使用给定的图像金字塔层数。
+        /// true使用给定的图像金字塔层数，
+        /// false使用最小缩放尺寸自动计算图像金字塔层数</param>
+        /// <param name="debug">是否启动debug。</param>
+        public void LearnPattern(
+            Mat matTemp,
+            int pyramidMaxLayers,
+            int minReudceArea,
+            bool maxLevelFirst,
             bool debug = false)
         {
             // 输入验证
@@ -48,7 +149,7 @@ namespace PatternMatchByNCC
                 throw new ArgumentException("最小缩放尺寸必须大于0", nameof(minReudceArea));
             }
 
-            TemplData templData = new TemplData();
+            TemplateData = new TemplData();
             if (!maxLevelFirst)
             {
                 pyramidMaxLayers = GetTopLayer(matTemp, minReudceArea);
@@ -61,11 +162,11 @@ namespace PatternMatchByNCC
             // 构建模板图像金字塔
             VectorOfMat pyramidArray = new VectorOfMat();
             Cv2.BuildPyramid(matTemp, pyramidArray, pyramidMaxLayers);
-            templData.VecPyramid = pyramidArray.ToArray().ToList();
+            TemplateData.VecPyramid = pyramidArray.ToArray().ToList();
 
             if (debug)
             {
-                foreach (var mat in templData.VecPyramid)
+                foreach (var mat in TemplateData.VecPyramid)
                 {
                     Cv2.ImShow("pyramid", mat);
                     Cv2.WaitKey(0);
@@ -74,14 +175,14 @@ namespace PatternMatchByNCC
             }
 
             // 计算模板边界颜色(用于仿射变换填充)
-            templData.BorderColor = Cv2.Mean(matTemp).Val0 < 128 ? 0 : 255; // 假设边界颜色为黑色或白色
-            templData.Resize(templData.VecPyramid.Count); // 确保所有列表大小一致
+            TemplateData.BorderColor = Cv2.Mean(matTemp).Val0 < 128 ? 0 : 255; // 假设边界颜色为黑色或白色
+            TemplateData.Resize(TemplateData.VecPyramid.Count); // 确保所有列表大小一致
 
             // 计算每层金字塔图像的统计参数
-            for (int i = 0; i < templData.VecPyramid.Count; i++)
+            for (int i = 0; i < TemplateData.VecPyramid.Count; i++)
             {
-                Mat matPyramid = templData.VecPyramid[i];
-                
+                Mat matPyramid = TemplateData.VecPyramid[i];
+
                 // 计算每层图像的逆面积
                 double invArea = 1.0 / (matPyramid.Width * matPyramid.Height);
 
@@ -93,7 +194,7 @@ namespace PatternMatchByNCC
                 // 检查是否为纯色图像
                 if (templNorm < double.Epsilon) // 如果标准差接近0，认为是纯色图像
                 {
-                    templData.VecResultEqual1[i] = true; // 标记为纯色图像
+                    TemplateData.VecResultEqual1[i] = true; // 标记为纯色图像
                 }
 
                 // 计算总平方和
@@ -104,14 +205,12 @@ namespace PatternMatchByNCC
                 templNorm /= Math.Sqrt(invArea);
 
                 // 保存计算结果
-                templData.VecTemplMean[i] = templMean;
-                templData.VecTemplNorm[i] = templNorm;
-                templData.VecInvArea[i] = invArea;
+                TemplateData.VecTemplMean[i] = templMean;
+                TemplateData.VecTemplNorm[i] = templNorm;
+                TemplateData.VecInvArea[i] = invArea;
             }
 
-            templData.IsPatternLearned = true;
-
-            return templData;
+            TemplateData.IsPatternLearned = true;
         }
 
         /// <summary>
@@ -139,7 +238,6 @@ namespace PatternMatchByNCC
         /// 模板匹配方法，使用归一化互相关(NCC)进行匹配
         /// </summary>
         /// <param name="src">输入源图像</param>
-        /// <param name="templData">模板数据</param>
         /// <param name="reverse">输入图像反转</param>
         /// <param name="angleStep">角度步长</param>
         /// <param name="autoAngleStep">是否使用自动计算角度步长</param>
@@ -153,10 +251,9 @@ namespace PatternMatchByNCC
         /// <param name="fastMode">是否使用快速模式，启用则进行粗匹配，提升速度，牺牲精度</param>
         /// <param name="debug">是否启用调试</param>
         /// <returns>匹配结果</returns>
-        /// <exception cref="NotImplementedException"></exception>
-        public List<SingleMatchedTarget> Match(
+        public int Match(
             Mat src, 
-            TemplData templData, 
+            // TemplData TemplateData, 
             bool reverse, 
             double angleStep = 5,
             bool autoAngleStep = false,
@@ -175,12 +272,12 @@ namespace PatternMatchByNCC
             {
                 throw new ArgumentNullException(nameof(src), "源图像不能为空");
             }
-            if (templData == null || !templData.IsPatternLearned || templData.VecPyramid.Count == 0)
+            if (TemplateData == null || !TemplateData.IsPatternLearned || TemplateData.VecPyramid.Count == 0)
             {
-                throw new ArgumentException("模板数据无效或未学习", nameof(templData));
+                throw new ArgumentException("模板数据无效或未学习", nameof(TemplateData));
             }
             // 获取模板图像（第0层为原始尺寸）
-            Mat templateImg = templData.VecPyramid[0];
+            Mat templateImg = TemplateData.VecPyramid[0];
 
             // 验证源图像和模板图像是否为空
             if (src.Empty() || templateImg.Empty())
@@ -210,7 +307,7 @@ namespace PatternMatchByNCC
             // 建立源图像的图像金字塔
             VectorOfMat srcPyramid = new VectorOfMat();
             
-            int topLayer = templData.VecPyramid.Count - 1; // 不包括原始图像层
+            int topLayer = TemplateData.VecPyramid.Count - 1; // 不包括原始图像层
             double D2R = Math.PI / 180.0;
             double R2D = 180.0 / Math.PI;
 
@@ -253,7 +350,7 @@ namespace PatternMatchByNCC
                 Cv2.DestroyAllWindows();
             }
 
-            Mat topTemplLayer = templData.VecPyramid[topLayer];
+            Mat topTemplLayer = TemplateData.VecPyramid[topLayer];
             Mat topSrcLayer = srcPyramidList[topLayer];
 
             // 第一阶段，以最顶层找出大致角度和ROI
@@ -348,7 +445,7 @@ namespace PatternMatchByNCC
                 double dValue = 0.0;
                 double dMaxVal = 0.0;
                 Size sizeBest = GetBestRotationSize(srcPyramidList[topLayer].Size(),
-                    templData.VecPyramid[topLayer].Size(), angles[i]);
+                    TemplateData.VecPyramid[topLayer].Size(), angles[i]);
 
                 float fTranslationX = (sizeBest.Width - 1) / 2.0f - topSrcCenter.X;
                 float fTranslationY = (sizeBest.Height - 1) / 2.0f - topSrcCenter.Y;
@@ -369,7 +466,7 @@ namespace PatternMatchByNCC
                 }
                 Mat matRotatedSrc = new Mat();
                 Cv2.WarpAffine(srcPyramidList[topLayer], matRotatedSrc, matR, sizeBest, InterpolationFlags.Linear,
-                    BorderTypes.Constant, new Scalar(templData.BorderColor));
+                    BorderTypes.Constant, new Scalar(TemplateData.BorderColor));
 
                 if (debug)
                 {
@@ -379,11 +476,11 @@ namespace PatternMatchByNCC
                     Cv2.DestroyAllWindows();
                 }
 
-                MatchTemplate(matRotatedSrc, templData, ref matResult, topLayer, false);
+                MatchTemplate(matRotatedSrc, TemplateData, ref matResult, topLayer, false);
 
                 if (useBlockCalculation)
                 {
-                    BlockMax blockMax = new BlockMax(matResult, templData.VecPyramid[topLayer].Size());
+                    BlockMax blockMax = new BlockMax(matResult, TemplateData.VecPyramid[topLayer].Size());
                     blockMax.GetMaxValueLoc(out dMaxVal, out ptMaxLoc);
                     if (dMaxVal < layerScores[topLayer])
                     {
@@ -548,12 +645,12 @@ namespace PatternMatchByNCC
                         {
                             // 计算角度步进值
                             // 使用 arctan(2/max(width,height)) 来确定合适的角度步进
-                            angleStep = Math.Atan(2.0 / Math.Max(templData.VecPyramid[iLayer].Cols,
-                                templData.VecPyramid[iLayer].Rows)) * R2D;
+                            angleStep = Math.Atan(2.0 / Math.Max(TemplateData.VecPyramid[iLayer].Cols,
+                                TemplateData.VecPyramid[iLayer].Rows)) * R2D;
 
                             if (debug)
                             {
-                                Console.WriteLine($"Top layer size: {templData.VecPyramid[iLayer].Width}x{templData.VecPyramid[iLayer].Height}");
+                                Console.WriteLine($"Top layer size: {TemplateData.VecPyramid[iLayer].Width}x{TemplateData.VecPyramid[iLayer].Height}");
                                 Console.WriteLine($"Angle step: {angleStep:F2}°");
                             }
                         }
@@ -604,10 +701,10 @@ namespace PatternMatchByNCC
                             Mat matResult = new Mat();
                             double dMaxValue = 0.0;
                             Point ptMaxLoc = new Point();
-                            GetRotatedRoi(srcPyramidList[iLayer], templData.VecPyramid[iLayer].Size(), ptLT * 2,
+                            GetRotatedRoi(srcPyramidList[iLayer], TemplateData.VecPyramid[iLayer].Size(), ptLT * 2,
                                 vecAngles[j], ref matRotatedSrc);
 
-                            MatchTemplate(matRotatedSrc, templData, ref matResult, iLayer, true);
+                            MatchTemplate(matRotatedSrc, TemplateData, ref matResult, iLayer, true);
                             Cv2.MinMaxLoc(matResult, out _, out dMaxValue, out _, out ptMaxLoc);
                             vecNewMatchParameters.Add( new MatchParameter(ptMaxLoc, dMaxValue,
                                 vecAngles[j]));
@@ -686,8 +783,8 @@ namespace PatternMatchByNCC
             // 过滤
             FilterWithScore(ref vecAllResult, scoreThreshold);
             // 去重
-            iDstWidth = templData.VecPyramid[iStopLayer].Cols * (iStopLayer == 0 ? 1 : 2);
-            iDstHeight = templData.VecPyramid[iStopLayer].Rows * (iStopLayer == 0 ? 1 : 2);
+            iDstWidth = TemplateData.VecPyramid[iStopLayer].Cols * (iStopLayer == 0 ? 1 : 2);
+            iDstHeight = TemplateData.VecPyramid[iStopLayer].Rows * (iStopLayer == 0 ? 1 : 2);
 
             for (int i = 0; i < vecAllResult.Count; i++)
             {
@@ -713,9 +810,9 @@ namespace PatternMatchByNCC
             // 根据分数排序
             vecAllResult.Sort(CompareScoreBig2Small);
 
-            iDstWidth = templData.VecPyramid[0].Cols;
-            iDstHeight = templData.VecPyramid[0].Rows;
-            List<SingleMatchedTarget> matchedTargets = new List<SingleMatchedTarget>();
+            iDstWidth = TemplateData.VecPyramid[0].Cols;
+            iDstHeight = TemplateData.VecPyramid[0].Rows;
+            Matches = new List<SingleMatchedTarget>();
             for (int i = 0; i < vecAllResult.Count; i++)
             {
                 SingleMatchedTarget sstm = new SingleMatchedTarget();
@@ -747,7 +844,7 @@ namespace PatternMatchByNCC
                 }
 
                 sstm.Index = i;
-                matchedTargets.Add(sstm);
+                Matches.Add(sstm);
 
                 // 如果已经达到最大匹配数量，则退出
                 if (i + 1 == maxMatchCount)
@@ -756,8 +853,9 @@ namespace PatternMatchByNCC
                 }
             }
 
+            MatchedTargetNum = Matches.Count;
+            return MatchedTargetNum;
             //throw new NotImplementedException();
-            return matchedTargets;
         }
 
         private void FilterWithRotateRect(ref List<MatchParameter> vec, TemplateMatchModes iMethod, double maxOverlap)
@@ -1330,6 +1428,44 @@ namespace PatternMatchByNCC
 
             // 返回旋转后的点坐标
             return new Point2f((float)dX, (float)dY);
+        }
+
+        public void ShowTemplatePyramid()
+        {
+            if (TemplateData.IsPatternLearned)
+            {
+                Console.WriteLine($"金字塔层数: {TemplateData.VecPyramid.Count}");
+                // 显示金字塔图像
+                foreach (var mat in TemplateData.VecPyramid)
+                {
+                    Cv2.ImShow("Pyramid Image", mat);
+                    Cv2.WaitKey(0);
+                }
+            }
+        }
+
+        public void Visualization(
+            Mat image,
+            Scalar color,
+            Scalar indexFrontColor = default,
+            Scalar scoreFrontColor = default,
+            double frontScale = 0.5,
+            int thickness = 1,
+            bool showIndex = true,
+            bool showDirection = true,
+            bool showMark = true,
+            bool showScore = true)
+        {
+            for (int i = 0; i < MatchedTargetNum; i++)
+            {
+                Point ptLT = new Point(Matches[i].LeftTop.X, Matches[i].LeftTop.Y);
+                Point ptRB = new Point(Matches[i].RightBottom.X, Matches[i].RightBottom.Y);
+                Point ptLB = new Point(Matches[i].LeftBottom.X, Matches[i].LeftBottom.Y);
+                Point ptRT = new Point(Matches[i].RightTop.X, Matches[i].RightTop.Y);
+
+                Matches[i].Visualize(image, color, indexFrontColor, scoreFrontColor,
+                    frontScale: frontScale, thickness: thickness, showMark, showDirection, showIndex, showScore);
+            }
         }
     }
 }

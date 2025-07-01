@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static PatternMatchByNCC.BlockMax;
+using static PatternMatch.BlockMax;
 
-namespace PatternMatchByNCC
+namespace PatternMatch
 {
     /// <summary>
     /// 模板数据类，包含模板图像金字塔及其统计参数

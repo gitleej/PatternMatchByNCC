@@ -69,28 +69,15 @@ namespace PatternMatchByNCC
             Cv2.ImShow($"{matchedTargetNum}", showMat);
             Cv2.WaitKey(0);
 
-            PatternMatchByNCC patternMatch = new PatternMatchByNCC();
+            PatternMatch.PatternMatchByNCC patternMatch = new PatternMatch.PatternMatchByNCC();
             int pyramidMaxLayers = 3;
             int minReudceArea = 256; // 最小缩小面积
             bool maxLevelFirst = false; // 是否先缩小到最大层级
-            TemplData templData = patternMatch.LearnPattern(dst, pyramidMaxLayers, minReudceArea, maxLevelFirst, debug);
-
-            if (templData.IsPatternLearned)
-            {
-                Console.WriteLine("模板学习成功！");
-                Console.WriteLine($"金字塔层数: {templData.VecPyramid.Count}");
-                Console.WriteLine($"边框颜色: {templData.BorderColor}");
-                // 显示金字塔图像
-                foreach (var mat in templData.VecPyramid)
-                {
-                    Cv2.ImShow("Pyramid Image", mat);
-                    Cv2.WaitKey(0);
-                }
-            }
-            else
-            {
-                Console.WriteLine("模板学习失败！");
-            }
+            // TemplData templData = patternMatch.LearnPattern(dst, pyramidMaxLayers, minReudceArea, maxLevelFirst, debug);
+            patternMatch.LearnPattern(dst, pyramidMaxLayers,
+                minReudceArea, maxLevelFirst, debug);
+            // 显示模板图像金字塔
+            patternMatch.ShowTemplatePyramid();
 
             // 匹配
             bool srcReverse = false; // 是否反转源图像
@@ -110,7 +97,7 @@ namespace PatternMatchByNCC
             for (int i = 0; i < repeatTimes; i++)
             {
                 var repeatStopWatch = Stopwatch.StartNew();
-                result = patternMatch.Match(src, templData, srcReverse, angleStep, autoAngleStep, startAngle, angleRange,
+                patternMatch.Match(src,  srcReverse, angleStep, autoAngleStep, startAngle, angleRange,
                     matchThreshold, maxMatchCount, useSIMD, maxOverlap, subPixelEstimation, fastMode, debug);
                 repeatStopWatch.Stop();
                 Console.WriteLine($"第 {i + 1} 次匹配耗时: {repeatStopWatch.Elapsed.TotalMilliseconds:F2} ms");
@@ -120,23 +107,18 @@ namespace PatternMatchByNCC
             // 匹配时间消耗
             Console.WriteLine($"匹配耗时: {stopwatch.Elapsed.TotalMilliseconds / repeatTimes:F2} ms");
             // 可视化结果
-            Mat colorSrc = new Mat();
-            Cv2.CvtColor(src, colorSrc, ColorConversionCodes.GRAY2BGR);
-            for (int i = 0; i < result.Count; i++)
+            // 输出匹配结果
+            for (int i = 0; i < patternMatch.MatchedTargetNum; i++)
             {
-                Point ptLT = new Point(result[i].LeftTop.X, result[i].LeftTop.Y);
-                Point ptRB = new Point(result[i].RightBottom.X, result[i].RightBottom.Y);
-                Point ptLB = new Point(result[i].LeftBottom.X, result[i].LeftBottom.Y);
-                Point ptRT = new Point(result[i].RightTop.X, result[i].RightTop.Y);
-
-                result[i].Visualize(colorSrc, new Scalar(0, 255, 0), new Scalar(255, 0, 255), new Scalar(255, 0, 255),
-                    frontScale: 0.5, thickness: 1);
-
                 Console.WriteLine($"匹配结果 {i + 1}:");
                 //Console.WriteLine($"位置: {ptLT}, {ptRB}, {ptLB}, {ptRT}");
-                Console.WriteLine($"角度: {result[i].Angle}");
-                Console.WriteLine($"匹配分数: {result[i].Score}");
+                Console.WriteLine($"角度: {patternMatch.Matches[i].Angle}");
+                Console.WriteLine($"匹配分数: {patternMatch.Matches[i].Score}");
             }
+            Mat colorSrc = new Mat();
+            Cv2.CvtColor(src, colorSrc, ColorConversionCodes.GRAY2BGR);
+            patternMatch.Visualization(colorSrc, new Scalar(0, 255, 0), new Scalar(255, 0, 255),
+                new Scalar(255, 0, 255), frontScale: 0.5, thickness: 1, showScore: false);
 
             Cv2.ImShow("Matched Result", colorSrc);
             Cv2.WaitKey(0);
