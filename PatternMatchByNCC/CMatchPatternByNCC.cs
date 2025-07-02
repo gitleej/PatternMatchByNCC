@@ -112,6 +112,10 @@ namespace PatternMatch
         /// </summary>
         public List<SingleTargetMatch> Matches { set; get; }
 
+        /// <summary>
+        /// 构造函数，创建一个新的CMatchPatternByNCC实例。
+        /// </summary>
+        /// <exception cref="Exception">Failed to create native CMatchPatternByNCC instance.</exception>
         public CMatchPatternByNCC()
         {
             _native = NativeMethods.CPMCreate();
@@ -121,6 +125,9 @@ namespace PatternMatch
             }
         }
 
+        /// <summary>
+        /// 析构函数，释放CMatchPatternByNCC实例的资源。
+        /// </summary>
         public void Dispose()
         {
             if (_native != IntPtr.Zero)
@@ -180,6 +187,24 @@ namespace PatternMatch
             Cv2.DestroyAllWindows();
         }
 
+        /// <summary>
+        /// 模板匹配方法，使用归一化互相关(NCC)进行匹配。
+        /// </summary>
+        /// <param name="src">输入源图像</param>
+        /// <param name="srcReverse">是否进行源图像反转</param>
+        /// <param name="angleStep">旋转角度步长</param>
+        /// <param name="autoAngleStep">是否自动计算旋转角度步长</param>
+        /// <param name="startAngle">起始角度</param>
+        /// <param name="angleRange">角度范围</param>
+        /// <param name="matchThreshold">匹配得分阈值</param>
+        /// <param name="maxMatchCount">最大匹配数量</param>
+        /// <param name="useSIMD">是否启用SIMD加速</param>
+        /// <param name="maxOverlap">最大重叠率</param>
+        /// <param name="subPixelEstimation">是否启用亚像素估计</param>
+        /// <param name="fastMode">是否启用快速匹配模式</param>
+        /// <param name="debug">是否启用调试模式</param>
+        /// <returns>实际匹配目标数量</returns>
+        /// <exception cref="ObjectDisposedException">非托管类指针为空</exception>
         public int Match(Mat src,
             bool srcReverse = false, double angleStep = 10, bool autoAngleStep = true,
             double startAngle = 0, double angleRange = 360, double matchThreshold = 0.9,
@@ -225,6 +250,19 @@ namespace PatternMatch
             }
         }
 
+        /// <summary>
+        /// 匹配目标可视化
+        /// </summary>
+        /// <param name="image">输入可视化彩色图像</param>
+        /// <param name="color">匹配框颜色</param>
+        /// <param name="indexFrontColor">索引值标签颜色</param>
+        /// <param name="scoreFrontColor">得分标签颜色</param>
+        /// <param name="frontScale">字体大小</param>
+        /// <param name="thickness">线条粗细</param>
+        /// <param name="showIndex">是否显示索引值标签</param>
+        /// <param name="showDirection">是否显示目标方向箭头</param>
+        /// <param name="showMark">是否显示匹配中心标记</param>
+        /// <param name="showScore">是否显示得分标签</param>
         public void Visualization(
             Mat image, 
             Scalar color, 

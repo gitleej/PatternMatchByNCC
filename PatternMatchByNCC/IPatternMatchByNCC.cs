@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace PatternMatch
 {
+    /// <summary>
+    /// 模板匹配接口，使用归一化互相关(NCC)进行匹配
+    /// </summary>
     public interface IPatternMatchByNCC
     {
         /// <summary>

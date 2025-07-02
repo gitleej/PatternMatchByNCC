@@ -13,110 +13,24 @@ using PatternMatchByNCC;
 
 namespace PatternMatch
 {
+    /// <summary>
+    /// 模板匹配类，使用归一化互相关(NCC)进行匹配
+    /// </summary>
     public class PatternMatchByNCC : IPatternMatchByNCC
     {
         private const int MatchCandidateNum = 5;
-        public TemplData TemplateData;
-        public int MatchedTargetNum { get; set; } = 0;
-        public List<SingleMatchedTarget> Matches { get; set; }
-
         /// <summary>
-        /// 学习模板图像并构建金字塔
+        /// 模板数据
         /// </summary>
-        /// <param name="matTemp">输入模板图像</param>
-        /// <param name="pyramidMaxLayers">图像金字塔层数</param>
-        /// <param name="minReudceArea">最小缩放尺寸</param>
-        /// <param name="maxLevelFirst">是否优先使用给定的图像金字塔层数。
-        /// true使用给定的图像金字塔层数，
-        /// false使用最小缩放尺寸自动计算图像金字塔层数</param>
-        /// <param name="debug">是否启动debug。</param>
-        /// <returns>模板图像金字塔及其统计参数</returns>
-        // public TemplData LearnPattern(
-        //     Mat matTemp, 
-        //     int pyramidMaxLayers, 
-        //     int minReudceArea, 
-        //     bool maxLevelFirst, 
-        //     bool debug = false)
-        // {
-        //     // 输入验证
-        //     if (matTemp == null)
-        //     {
-        //         throw new ArgumentNullException(nameof(matTemp), "输入图像不能为空");
-        //     }
-        //     if (pyramidMaxLayers < 1 && maxLevelFirst)
-        //     {
-        //         throw new ArgumentException("金字塔层数必须大于0", nameof(pyramidMaxLayers));
-        //     }
-        //     if (minReudceArea < 1 && !maxLevelFirst)
-        //     {
-        //         throw new ArgumentException("最小缩放尺寸必须大于0", nameof(minReudceArea));
-        //     }
-        //
-        //     TemplData templData = new TemplData();
-        //     if (!maxLevelFirst)
-        //     {
-        //         pyramidMaxLayers = GetTopLayer(matTemp, minReudceArea);
-        //     }
-        //     else
-        //     {
-        //         pyramidMaxLayers -= 1;
-        //     }
-        //
-        //     // 构建模板图像金字塔
-        //     VectorOfMat pyramidArray = new VectorOfMat();
-        //     Cv2.BuildPyramid(matTemp, pyramidArray, pyramidMaxLayers);
-        //     templData.VecPyramid = pyramidArray.ToArray().ToList();
-        //
-        //     if (debug)
-        //     {
-        //         foreach (var mat in templData.VecPyramid)
-        //         {
-        //             Cv2.ImShow("pyramid", mat);
-        //             Cv2.WaitKey(0);
-        //         }
-        //         Cv2.DestroyAllWindows();
-        //     }
-        //
-        //     // 计算模板边界颜色(用于仿射变换填充)
-        //     templData.BorderColor = Cv2.Mean(matTemp).Val0 < 128 ? 0 : 255; // 假设边界颜色为黑色或白色
-        //     templData.Resize(templData.VecPyramid.Count); // 确保所有列表大小一致
-        //
-        //     // 计算每层金字塔图像的统计参数
-        //     for (int i = 0; i < templData.VecPyramid.Count; i++)
-        //     {
-        //         Mat matPyramid = templData.VecPyramid[i];
-        //         
-        //         // 计算每层图像的逆面积
-        //         double invArea = 1.0 / (matPyramid.Width * matPyramid.Height);
-        //
-        //         // 计算每层图像的均值和标准差
-        //         Scalar templMean, templSdv;
-        //         Cv2.MeanStdDev(matPyramid, out templMean, out templSdv);
-        //         double templNorm = templSdv[0] * templSdv[0] + templSdv[1] * templSdv[1] + templSdv[2] * templSdv[2];
-        //
-        //         // 检查是否为纯色图像
-        //         if (templNorm < double.Epsilon) // 如果标准差接近0，认为是纯色图像
-        //         {
-        //             templData.VecResultEqual1[i] = true; // 标记为纯色图像
-        //         }
-        //
-        //         // 计算总平方和
-        //         double templSum = templNorm + templMean[0] * templMean[0] + templMean[1] * templMean[1] +
-        //                           templMean[2] * templMean[2];
-        //         templSum /= invArea;
-        //         templNorm = Math.Sqrt(templNorm);
-        //         templNorm /= Math.Sqrt(invArea);
-        //
-        //         // 保存计算结果
-        //         templData.VecTemplMean[i] = templMean;
-        //         templData.VecTemplNorm[i] = templNorm;
-        //         templData.VecInvArea[i] = invArea;
-        //     }
-        //
-        //     templData.IsPatternLearned = true;
-        //
-        //     return templData;
-        // }
+        public TemplData TemplateData;
+        /// <summary>
+        /// 匹配到的目标数量
+        /// </summary>
+        public int MatchedTargetNum { get; set; } = 0;
+        /// <summary>
+        /// 匹配到的目标列表
+        /// </summary>
+        public List<SingleMatchedTarget> Matches { get; set; }
 
         /// <summary>
         /// 学习模板图像并构建金字塔
@@ -1430,6 +1344,9 @@ namespace PatternMatch
             return new Point2f((float)dX, (float)dY);
         }
 
+        /// <summary>
+        /// 可视化模板图像金字塔
+        /// </summary>
         public void ShowTemplatePyramid()
         {
             if (TemplateData.IsPatternLearned)
@@ -1444,6 +1361,19 @@ namespace PatternMatch
             }
         }
 
+        /// <summary>
+        /// 可视化匹配结果
+        /// </summary>
+        /// <param name="image">输入彩色图像</param>
+        /// <param name="color">边框颜色</param>
+        /// <param name="indexFrontColor">索引字体颜色</param>
+        /// <param name="scoreFrontColor">得分字体颜色</param>
+        /// <param name="frontScale">字体大小</param>
+        /// <param name="thickness">字体和线条粗细</param>
+        /// <param name="showIndex">是否显示索引值</param>
+        /// <param name="showDirection">是否显示方向箭头</param>
+        /// <param name="showMark">是否显示匹配中心标记</param>
+        /// <param name="showScore">是否显示匹配得分</param>
         public void Visualization(
             Mat image,
             Scalar color,

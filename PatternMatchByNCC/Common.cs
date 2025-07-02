@@ -13,14 +13,38 @@ namespace PatternMatch
     /// </summary>
     public class TemplData
     {
+        /// <summary>
+        /// 图像金字塔列表，包含不同分辨率的模板图像
+        /// </summary>
         public List<Mat> VecPyramid { get; set; } = new List<Mat>();
+        /// <summary>
+        /// 图像金字塔对应的模板均值列表
+        /// </summary>
         public List<Scalar> VecTemplMean { get;  set; } = new List<Scalar>();
+        /// <summary>
+        /// 图像金字塔对应的模板归一化列表
+        /// </summary>
         public List<double> VecTemplNorm { get;  set; } = new List<double>();
+        /// <summary>
+        /// 图像金字塔对应的逆面积列表，用于归一化匹配结果
+        /// </summary>
         public List<double> VecInvArea { get;  set; } = new List<double>();
+        /// <summary>
+        /// 图像金字塔对应的匹配结果是否等于1的列表
+        /// </summary>
         public List<bool> VecResultEqual1 { get;  set; } = new List<bool>();
+        /// <summary>
+        /// 图像金字塔是否已经学习
+        /// </summary>
         public bool IsPatternLearned { get; set; } = false;
+        /// <summary>
+        /// 边界颜色
+        /// </summary>
         public int BorderColor { get; set; }
 
+        /// <summary>
+        /// 清空模板图像金字塔数据
+        /// </summary>
         public void Clear()
         {
             VecPyramid.Clear();
@@ -30,6 +54,10 @@ namespace PatternMatch
             VecResultEqual1.Clear();
         }
 
+        /// <summary>
+        /// 重置模板数据大小
+        /// </summary>
+        /// <param name="size">金字塔层数</param>
         public void Resize(int size)
         {
             ResizeList(VecTemplMean, size, default(Scalar));
@@ -272,20 +300,44 @@ namespace PatternMatch
         }
     }
 
+    /// <summary>
+    /// 分块最大值处理类，用于将图像分块并计算每个块的最大值及其位置。
+    /// </summary>
     public class BlockMax
     {
+        /// <summary>
+        /// 分块数据类，包含块的矩形区域、最大值及其位置。
+        /// </summary>
         public class Block
         {
+            /// <summary>
+            /// 分块的矩形区域
+            /// </summary>
             public Rect Rect { get; set; }
+            /// <summary>
+            /// 分块内的最大值
+            /// </summary>
             public double DMax { get; set; }
+            /// <summary>
+            /// 分块内最大值的位置
+            /// </summary>
             public Point PtMaxLoc { get; set; }
 
+            /// <summary>
+            /// 构造函数，初始化分块数据。
+            /// </summary>
             public Block()
             {
                 Rect = new Rect();
                 DMax = 0.0;
                 PtMaxLoc = new Point();
             }
+            /// <summary>
+            /// 构造函数，使用指定的矩形区域、最大值和位置初始化分块数据。
+            /// </summary>
+            /// <param name="rect">分块矩形区域</param>
+            /// <param name="dMax">最大值</param>
+            /// <param name="ptMaxLoc">最大值位置</param>
             public Block(Rect rect, double dMax, Point ptMaxLoc)
             {
                 Rect = rect;
@@ -294,9 +346,18 @@ namespace PatternMatch
             }
         }
 
+        /// <summary>
+        /// 分块列表，包含所有分块的最大值和位置。
+        /// </summary>
         public List<Block> VecBlock { get; set; }
+        /// <summary>
+        /// 原始图像
+        /// </summary>
         public Mat MatSrc { get; set; }
 
+        /// <summary>
+        /// 构造函数，初始化分块列表和原始图像。
+        /// </summary>
         public BlockMax()
         {
             VecBlock = new List<Block>();
@@ -532,21 +593,69 @@ namespace PatternMatch
     /// parameters for position, score, and angle.</remarks>
     public class MatchParameter
     {
+        /// <summary>
+        /// 匹配框左上角点坐标
+        /// </summary>
         public Point2d Pt { get; set; }
+        /// <summary>
+        /// 匹配得分
+        /// </summary>
         public double DMatchScore { get; set; }
+        /// <summary>
+        /// 匹配角度（度）
+        /// </summary>
         public double DMatchAngle { get; set; }
+        /// <summary>
+        /// 矩形区域（ROI），用于匹配时的搜索范围
+        /// </summary>
         public Rect RectRoi { get; set; }
+        /// <summary>
+        /// 匹配起始角度
+        /// </summary>
         public double DAngleStart { get; set; }
+        /// <summary>
+        /// 匹配结束角度
+        /// </summary>
         public double DAngleEnd { get; set; }
+        /// <summary>
+        /// 旋转矩形区域
+        /// </summary>
         public RotatedRect RectR { get; set; }
+        /// <summary>
+        /// 边界矩形区域
+        /// </summary>
         public Rect RectBounding { get; set; }
+        /// <summary>
+        /// 是否删除该匹配结果
+        /// </summary>
         public bool BDelete { get; set; }
+        /// <summary>
+        /// 匹配结果列表
+        /// </summary>
         public double[,] VecResult { get; set; }
+        /// <summary>
+        /// 最大得分索引
+        /// </summary>
         public int IMaxScoreIndex { get; set; }
+        /// <summary>
+        /// 边界位置标志，指示匹配位置是否在图像边界上
+        /// </summary>
         public bool BPosOnBorder { get; set; }
+        /// <summary>
+        /// 亚像素坐标
+        /// </summary>
         public Point2d PtSubPixel  { get; set; }
+        /// <summary>
+        /// 新匹配角度（度）
+        /// </summary>
         public double DNewAngle { get; set; }
 
+        /// <summary>
+        /// 构造函数，使用指定的参数初始化匹配参数。
+        /// </summary>
+        /// <param name="ptMinMax">最大最小值点坐标</param>
+        /// <param name="dScore">得分</param>
+        /// <param name="dAngle">角度</param>
         public MatchParameter(Point2d ptMinMax, double dScore, double dAngle)
         {
             Pt = ptMinMax;
@@ -565,6 +674,9 @@ namespace PatternMatch
             DNewAngle = 0.0;
         }
 
+        /// <summary>
+        /// 构造函数，初始化匹配参数的默认值。
+        /// </summary>
         public MatchParameter()
         {
             Pt = new Point2d();
