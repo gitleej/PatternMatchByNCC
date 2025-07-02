@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package >
+  <metadata>
+    <id>PatternMatchByNCC</id>
+    <version>1.0.0</version>
+    <title>PatternMatchByNCC</title>
+    <authors>AILEE</authors>
+    <!-- <icon>icon.png</icon> -->
+    <description>基于归一化互相关（NCC, Normalized Cross Correlation）算法的高效图像模板匹配库</description>
+    <releaseNotes>基于归一化互相关（NCC, Normalized Cross Correlation）算法的高效图像模板匹配库</releaseNotes>
+    <copyright>copyright @ AILEE</copyright>
+  </metadata>
+  <files>
+    <!-- 把 x64 Release 输出的所有 DLL/XML/PDB 等文件都打包到 lib/net45/x64 -->
+    <file src="bin\x64\Release\PatternMatchByNCC.*" target="lib\net48\x64" />
+    <!-- 如果你有多个目标框架，可以添加多行 -->
+    <!--
+    <file src="bin\x64\Release\netstandard2.0\**\*.*" target="lib\netstandard2.0\x64" />
+    -->
+  </files>
+</package>
