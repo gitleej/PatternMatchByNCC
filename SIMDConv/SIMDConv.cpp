@@ -67,6 +67,7 @@ void SIMDWrapper::MatchTemplate_SIMD(
 	std::cout << std::endl;*/
 }
 
+#pragma managed(push, off)
 int Native_IM_Conv_SIMD(const unsigned char* pCharKernel, const unsigned char* pCharConv, int iLength)
 {
 	const int iBlockSize = 16;
@@ -98,3 +99,4 @@ int Native_IM_Conv_SIMD(const unsigned char* pCharKernel, const unsigned char* p
 
 	return sum;
 }
+#pragma managed(pop)
