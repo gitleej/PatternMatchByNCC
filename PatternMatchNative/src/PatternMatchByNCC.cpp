@@ -792,7 +792,10 @@ int PatternMatch::PatternMatchByNCC::Match(const unsigned char* srcImageData,
         throw std::invalid_argument("Template area is larger than source image");
     }
 
-    imwrite("src.png", matSrc);
+    if (debug)
+    {
+        imwrite("src.png", matSrc);
+    }
     
     // 建立源图像图像金字塔
     int iTopLayer = m_templateData.m_iPyramidLayers - 1;
