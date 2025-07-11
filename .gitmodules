@@ -1,0 +1,9 @@
+[submodule "PatternMatchNative/3rdparty/opencv4100"]
+	path = PatternMatchNative/3rdparty/opencv4100
+	url = http://172.16.170.179:6006/vision_team/opencv4100.git
+[submodule "PatternMatchNative/3rdparty/protobuf_25_8_static_md"]
+	path = PatternMatchNative/3rdparty/protobuf_25_8_static_md
+	url = http://172.16.170.179:6006/vision_team/protobuf_25_8_static_md.git
+[submodule "PatternMatchNative/3rdparty/protobuf_25_8_static_mdd"]
+	path = PatternMatchNative/3rdparty/protobuf_25_8_static_mdd
+	url = http://172.16.170.179:6006/vision_team/protobuf_25_8_static_mdd.git
