@@ -1,0 +1,32 @@
+syntax = "proto3";
+package templdata;
+
+// 四通道 Scalar
+message ScalarProto {
+  double v0 = 1;
+  double v1 = 2;
+  double v2 = 3;
+  double v3 = 4;
+}
+
+// 矩阵数据
+message MatProto {
+  int32 rows = 1;
+  int32 cols = 2;
+  int32 type = 3;
+  bytes data = 4;
+}
+
+// 顶层模板数据
+message TemplDataProto {
+  repeated MatProto    pyramid       = 1;
+  repeated ScalarProto templMean     = 2;
+  // templNorm 仍然是单值数组
+  repeated double      templNorm     = 3;
+  repeated double      invArea       = 4;
+  repeated bool        resultEqual1  = 5;
+
+  bool   isPatternLearned = 6;
+  int32  borderColor      = 7;
+  int32  pyramidLayers    = 8;
+}
